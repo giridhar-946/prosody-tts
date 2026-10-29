@@ -22,15 +22,6 @@ This implementation is an extension of the Prosody-TTS to support multiple langu
  synthesize.py         text ─► espeak ─► phones ─► duration ─► F0/VAD ─► log-mel ─► Vocos ─► wav
 ```
 
-## Features
-
-- Explicit phone-duration model, F0 and VAD heads, TAP (eGeMAPS) auxiliary head, and a
-  log-mel decoder. Training uses the MFA durations as targets.
-- Frame-budget batching (dynamic batches, as in F5-TTS).
-- Per-epoch validation: one random dev utterance is synthesized with the current model,
-  and the original wav is kept next to it in `exp/samples/`.
-- Resume from `last.pt`, early stopping, learning-rate plateau schedule.
-- Text input through espeak-ng, or direct phone input (no espeak needed).
 
 ## Quick start
 
@@ -90,18 +81,6 @@ pip install pytest
 pytest tests -q          # 14 tests, no data or espeak needed for the mapping test
 ```
 
-## Known limitations
-
-- **Accent groups.** `data.language_of` currently returns the first token of the speaker's
-  parent folder. For folders such as `Hindi_0085` this gives `Hindi`; for LibriTTS
-  speaker folders (numeric names) every speaker becomes its own language, which makes the
-  language embedding very large. See [docs/data.md](docs/data.md#5-accent-groups).
-- **Prosody control is not exposed.** The paper's duration and F0 scaling (Section 4) is not
-  implemented in `synthesize.py`.
-- **No joint vocoder training.** The paper trains a Waffler-style vocoder with the acoustic
-  model. Here Vocos is frozen and pretrained.
-- **No subjective or objective evaluation** is included in this repository yet.
-- Model weights and datasets are not distributed.
 
 ## Documentation
 
