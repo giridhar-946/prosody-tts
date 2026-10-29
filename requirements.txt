@@ -1,0 +1,17 @@
+# Tested versions (Python 3.10). Install PyTorch first, from the CUDA index that matches your driver:
+#   pip install torch==2.11.0 torchaudio==2.11.0 --index-url https://download.pytorch.org/whl/cu128
+torch==2.11.0
+torchaudio==2.11.0
+vocos==0.1.0
+datasets==5.1.0
+pyarrow==25.0.1
+phonemizer==3.4.0          # needs the espeak-ng system package
+amfm_decompy==1.0.12.2     # pYAAPT F0 tracker
+opensmile==2.6.0           # eGeMAPSv02 TAPs
+soundfile==0.14.0
+numpy==2.2.6
+scipy==1.15.3
+scikit-learn==1.7.2
+joblib==1.6.0
+tqdm==4.70.1
+pytest                     # tests only

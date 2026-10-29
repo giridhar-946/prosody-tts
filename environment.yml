@@ -1,0 +1,11 @@
+name: mlms-tts
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - pip
+  - pip:
+      # install PyTorch first (CUDA index that matches your driver), then the rest:
+      # pip install torch==2.11.0 torchaudio==2.11.0 --index-url https://download.pytorch.org/whl/cu128
+      - -r requirements.txt

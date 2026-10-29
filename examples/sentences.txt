@@ -1,0 +1,2 @@
+english	The weather is nice today.
+english	Please call me when you reach the station.
