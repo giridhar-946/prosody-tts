@@ -1,9 +1,8 @@
-# MLMS-TTS
+# Prosody-TTS
 
-A multi-speaker, accent-aware, non-autoregressive text-to-speech system. It follows the
-Prosody-TTS design (explicit phone duration and F0 modelling with auxiliary losses) and
-uses a pretrained **Vocos** vocoder at a **20 ms** frame rate (16 kHz), with **espeak-ng**
-for text-to-phone conversion and **MFA phone alignments** for training.
+An End-to-End Speech Synthesis System with Prosody Control. Prosody-TTS is a data-efficient end-to-end speech synthesis model that combines the advantages of statistical parametric models and end-to-end neural network models. It also has a provision to modify or incorporate the desired prosody at the finer level by controlling the fundamental frequency (f0) and the phone duration.
+
+This implementation is an extension of the Prosody-TTS to support multiple languages speakers. Vocos is used as the vocoder.
 
 - Paper this is based on: Pamisetty & Murty, *Prosody-TTS: An End-to-End Speech Synthesis
   System with Prosody Control*, Circuits, Systems, and Signal Processing 42, 361–384 (2023),
