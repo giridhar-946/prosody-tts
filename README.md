@@ -12,16 +12,24 @@ This implementation is an extension of the Prosody-TTS to support multiple langu
 ## Pipeline
 
 ```
-                 ┌──────────── data (docs/data.md) ────────────┐
- wav + MFA TextGrid ─► prepare_arrow (tools/)  ─► raw.arrow ───┤
+Get phoneme level durations using the Montreal forced aligner (MFA)
                                                               ▼
  extract_features.py   wav ─► log-mel (Vocos), F0 (pYAAPT), TAPs (eGeMAPS) ─► exp/feats.arrow
                                                               ▼
- train.py              phones, durations (MFA), F0, TAPs, mel ─► MLMSTTS ─► exp/weights/
+ train.py              phones, durations (MFA), F0, TAPs, mel ─► Prosody-TTS ─► exp/weights/
                                                               ▼
  synthesize.py         text ─► espeak ─► phones ─► duration ─► F0/VAD ─► log-mel ─► Vocos ─► wav
 ```
 
+## Installation
+
+Tested with Python 3.10, PyTorch 2.11 (CUDA 12.8), and espeak-ng 1.51.
+
+```bash
+conda env create -f environment.yml          # or: see requirements.txt
+conda activate prosodytts
+sudo apt-get install espeak-ng                # phonemizer loads libespeak-ng
+```
 
 ## Quick start
 
@@ -29,7 +37,7 @@ Full details: [data](docs/data.md), [training](docs/training.md), [inference](do
 
 ```bash
 # 1. environment (see Installation below)
-conda activate mlms-tts
+conda activate prosodytts
 
 # 2. features from an arrow dataset (docs/data.md)
 python extract_features.py --arrow_dir /path/to/arrow_dir --exp_dir exp --workers 16
@@ -40,16 +48,6 @@ python train.py --arrow_dir /path/to/arrow_dir --exp_dir exp --frames_per_batch 
 # 4. synthesize
 python synthesize.py --exp_dir exp --speaker <speaker_key> \
     --text_file examples/sentences.txt --out_dir Synthesized
-```
-
-## Installation
-
-Tested with Python 3.10, PyTorch 2.11 (CUDA 12.8), and espeak-ng 1.51.
-
-```bash
-conda env create -f environment.yml          # or: see requirements.txt
-conda activate mlms-tts
-sudo apt-get install espeak-ng                # phonemizer loads libespeak-ng
 ```
 
 The vocoder checkpoint is not in this repository. Set `MLMS_VOCODER_DIR` (or pass
