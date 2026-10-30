@@ -1,4 +1,4 @@
-name: mlms-tts
+name: prosodytts
 channels:
   - conda-forge
   - defaults
