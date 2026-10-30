@@ -72,13 +72,6 @@ in development has exactly this layout.
 | `tests/test_units.py` | Unit tests that run without data |
 | `docs/` | Data, training, inference, architecture documentation |
 
-## Testing
-
-```bash
-pip install pytest
-pytest tests -q          # 14 tests, no data or espeak needed for the mapping test
-```
-
 
 ## Documentation
 
