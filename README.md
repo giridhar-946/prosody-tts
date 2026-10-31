@@ -29,6 +29,8 @@ Tested with Python 3.10, PyTorch 2.11 (CUDA 12.8), and espeak-ng 1.51.
 conda env create -f environment.yml          # or: see requirements.txt
 conda activate prosodytts
 sudo apt-get install espeak-ng                # phonemizer loads libespeak-ng
+conda config --env --add channels conda-forge
+conda install montreal-forced-aligner
 ```
 
 ## Quick start
@@ -38,6 +40,21 @@ Full details: [data](docs/data.md), [training](docs/training.md), [inference](do
 ```bash
 # 1. environment (see Installation below)
 conda activate prosodytts
+
+# 2. Preprocess data. See docs/data.md for data structure
+python tools/preprocess_data.py --data_path /path/to/data
+
+# 3. Prepare pronunciation dictionary. If working with multiple languages, repeat the same for all languages
+python prepare_dict.py --language <langauge1> --path /path/to/data
+python prepare_dict.py --language <langauge2> --path /path/to/data
+
+# 4. Align speech and phonemes to get phoneme durations.
+mfa validate --temporary_directory /path/to/tmp/dir --clean --no_final_clean --ignore_acoustics --num_jobs 24
+       --use_mp /path/to/data/language /path/to/data/language/language.txt
+python tools/move_oov.py --oov_path ~align_tmp/language/utterance_oovs.txt --data_path /path/to/data/languge --tmp_path temp_dir
+python tools/move_missing.py --missing_path ~align_tmp/language/missing_utterances.txt --data_path /path/to/data/languge --tmp_path temp_dir
+
+
 
 # 2. features from an arrow dataset (docs/data.md)
 python extract_features.py --arrow_dir /path/to/arrow_dir --exp_dir exp --workers 16
