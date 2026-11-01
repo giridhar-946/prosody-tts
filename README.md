@@ -74,9 +74,6 @@ python synthesize.py --exp_dir /path/to/exp/dir --speaker <speaker_key> \
     --text_file examples/sentences.txt --out_dir Synthesized
 ```
 
-Pass (`--vocoder_dir`) to a folder containing `config.yaml` and `pytorch_model.bin` for a Vocos
-model with 16 kHz audio, 1024 FFT, hop 320, 100 mel bins. 
-
 
 ## Documentation
 
