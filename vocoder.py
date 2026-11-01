@@ -9,7 +9,7 @@ import os
 import torch
 from vocos import Vocos
 
-DEFAULT_VOCODER_DIR = os.environ.get('MLMS_VOCODER_DIR', '/data/AccentConv/Giridhar/f5_tts/vocoder')
+DEFAULT_VOCODER_DIR = os.path.join(os.getcwd(), 'vocoder')
 SAMPLE_RATE = 16_000
 
 
