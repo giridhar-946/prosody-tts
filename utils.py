@@ -22,3 +22,4 @@ def arange_list(a):
         fwd = np.append(fwd, idx)
         rev = np.append(rev, np.flip(idx))
     return fwd, rev
+    
