@@ -2,7 +2,8 @@
 
 Input text file, one utterance per line: '<language><TAB><text>', where <language> is a
 name from exp_dir/languages.txt (the accent group the output should follow) and
-<text> is English (espeak voice en-us by default; see phonemize.py).
+<text> is phonemized per word with espeak for that language, ASCII words as English
+(same conversion as gen_text in f5_tts infer_v5n_multi.py; see phonemize.py).
 
 Usage (repo root):
     python synthesize.py --exp_dir exp --speaker english_female_indtef \
@@ -91,7 +92,6 @@ def main():
     p.add_argument('--speaker', required=True, help='speaker key, e.g. english_female_indtef (see speakers.txt)')
     p.add_argument('--text_file', required=True)
     p.add_argument('--out_dir', default='Synthesized')
-    p.add_argument('--voice', default='en-us', help='espeak voice for the text column')
     p.add_argument('--phones_input', action='store_true')
     p.add_argument('--vocoder_dir', default=DEFAULT_VOCODER_DIR)
     p.add_argument('--device', default='cuda' if torch.cuda.is_available() else 'cpu')
@@ -133,7 +133,7 @@ def main():
             phones = text.split()
         else:
             try:
-                phones = text_to_phones(text, set(phone_table), voice=args.voice)
+                phones = text_to_phones(text, set(phone_table), language)
             except ValueError as e:
                 raise SystemExit(f'sentence {i}: {e}')
         phone_ids = ids_from_phones(phones, phone_table, i)
