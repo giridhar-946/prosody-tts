@@ -58,11 +58,12 @@ mfa train --config_path configs/config_mfa.yaml --temporary_directory ~/path/to/
 
 Repeat the step for all the languages if training for multiple speakers
 
-# 5. 
+# 5. Extract duration data from the MFA textgrids.
+python tools/prepare_align_data.py --exp_dir /path/to/exp/dir --mfa_dir_list /comma/separated/list/of/mfa/out/dirs
 
-
-# 2. features from an arrow dataset (docs/data.md)
-python extract_features.py --arrow_dir /path/to/arrow_dir --exp_dir exp --workers 16
+# 6. Prepare training data
+python prepare_train_data.py --exp_dir /path/to/exp/dir --workers 16
+##pip uninstall  python-iso639 in local env
 
 # 3. train
 python train.py --arrow_dir /path/to/arrow_dir --exp_dir exp --frames_per_batch 2500
