@@ -1,10 +1,5 @@
 """Dataset, dynamic batching and collation over the F5-TTS arrow files.
 
-Reads the arrow files written by f5_tts/train/datasets/prepare_data_v5.py and reused
-unchanged:
-    <arrow_dir>/raw.arrow       audio_path, text (MFA phones), duration (s), phn_durs (20 ms frames)
-    <arrow_dir>/spk2id.json     speaker folder name -> id (kept so speaker ids stay fixed)
-
 Pitch and TAP targets come from feats.arrow written by extract_features.py.
 The mel spectrogram is computed on the fly from the wav (as CustomDataset in F5 does),
 with the Vocos 20 ms settings from mel.py.
