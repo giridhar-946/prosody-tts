@@ -63,37 +63,18 @@ python tools/prepare_align_data.py --exp_dir /path/to/exp/dir --mfa_dir_list /co
 
 # 6. Prepare training data
 python prepare_train_data.py --exp_dir /path/to/exp/dir --workers 16
-##pip uninstall  python-iso639 in local env
+## If error occurs with iso369, uninstall python-iso639 in the local by deactivating the prosodytts env (pip uninstall  python-iso639)
 
-# 3. train
-python train.py --arrow_dir /path/to/arrow_dir --exp_dir exp --frames_per_batch 2500
+# 7. train
+CUDA_VISIBLE_DEVICES=6 python train.py --exp_dir /path/to/exp/dir --frames_per_batch 2500
 
-# 4. synthesize
-python synthesize.py --exp_dir exp --speaker <speaker_key> \
+# 8. synthesize
+python synthesize.py --exp_dir /path/to/exp/dir --speaker <speaker_key> \
     --text_file examples/sentences.txt --out_dir Synthesized
 ```
 
-The vocoder checkpoint is not in this repository. Set `MLMS_VOCODER_DIR` (or pass
-`--vocoder_dir`) to a folder containing `config.yaml` and `pytorch_model.bin` for a Vocos
-model with 16 kHz audio, 1024 FFT, hop 320, 100 mel bins. The F5-TTS vocoder folder used
-in development has exactly this layout.
-
-## Repository layout
-
-| File | Purpose |
-|---|---|
-| `extract_features.py` | Builds `exp/` from an arrow dataset: phone table, speakers, languages, `feats.arrow`, F0 stats, TAP scalers |
-| `train.py` | Training loop, validation samples, checkpoints |
-| `synthesize.py` | Text (or phones) to 16 kHz wav |
-| `data.py` | Dataset, frame-budget sampler, collate, language and speaker keys |
-| `model.py` | MLMS-TTS acoustic model (PyTorch) |
-| `mel.py` | Vocos-compatible log-mel (20 ms, 16 kHz, 100 bins) |
-| `vocoder.py` | Loads and runs the Vocos vocoder |
-| `phonemize.py` | espeak-ng text to phone symbols, mapped to the training inventory |
-| `utils.py` | Min-max helpers and forward/reverse phone position helpers |
-| `tools/prepare_arrow_from_mfa.py` | Reference script that builds `raw.arrow` from MFA TextGrids (see its notes) |
-| `tests/test_units.py` | Unit tests that run without data |
-| `docs/` | Data, training, inference, architecture documentation |
+Pass (`--vocoder_dir`) to a folder containing `config.yaml` and `pytorch_model.bin` for a Vocos
+model with 16 kHz audio, 1024 FFT, hop 320, 100 mel bins. 
 
 
 ## Documentation
