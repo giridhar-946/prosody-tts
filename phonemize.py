@@ -1,67 +1,151 @@
-"""Text -> phone symbols with espeak-ng, mapped onto the arrow (MFA) phone inventory.
-
-The training phones come from the MFA alignments stored in the F5 arrow files, so the
-model's phone inventory is the arrow vocabulary (vocab.txt). Espeak produces a few
-phones that never occur in that vocabulary; they are mapped here (ESPEAK_TO_VOCAB,
-from a comparison of espeak and MFA output on 1500 transcripts).
-
-Alignment markers the MFA data contains are reproduced by the rules in
-prepare_data_v5.py: 'ss' at the start, 'es' at the end, and 'cl' (closure) before
-voiceless stops. Word-boundary pauses ('sp') are not inserted, because the MFA data
-only has them where a pause was actually detected.
 """
-from phonemizer import phonemize
+Punctuation is turned into word tokens (COMMA, FLSTP, ...) and spaces into '_', then each
+token is phonemized on its own: '_' -> 'sp', punctuation tokens -> the punctuation symbol,
+words -> espeak (language picked per word: ASCII words are English) followed by the
+script-specific replacement table in Replacements/. The result is wrapped in 'ss' ... 'es'.
+"""
+import json
+import os
+import re
+
+from phonemizer.backend import EspeakBackend
 from phonemizer.separator import Separator
 
-DEFAULT_VOICE = 'en-us'
+_SEPARATOR = Separator(phone=' ', word='  ')
+_REPL_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'Replacements')
 
-ESPEAK_TO_VOCAB = {
-    'ð': 'd',
-    'w': 'ʋ',
-    'v': 'ʋ',
-    'f': 'pʰ',
-    'ɾ': 'ɹ',
-    'θ': 't',
+lang_code_map = {'hindi': 'hi', 'bengali': 'bn', 'malayalam': 'ml', 'kannada': 'kn', 'tamil': 'ta',
+                 'telugu': 'te', 'assamese': 'as', 'bodo': 'hi', 'gujarati': 'gu', 'manipuri': 'bpy',
+                 'marathi': 'mr', 'odia': 'or', 'rajasthani': 'hi', 'magadhi': 'hi', 'maithili': 'hi',
+                 'sanskrit': 'hi', 'bhojpuri': 'hi', 'sindhi': 'sd', 'chhattisgarhi': 'hi', 'dogri': 'hi',
+                 'DOI': 'hi', 'punjabi': 'pa', 'konkani': 'kok', 'nepali': 'ne', 'magahi': 'hi',
+                 'english': 'en-gb', 'en': 'en-gb', 'niaenglish': 'en-gb'}
+
+punct_map = {
+    ",": " COMMA ",
+    ".": " FLSTP ",
+    "।": " FLSTPH ",
+    "?": " QMARK ",
+    "!": " EXCLM ",
+    ";": " SEMICLN ",
+    ":": " COLON ",
+    "\"": " DQUOTE ",
+    "'": " SQUOTE ",
+    "“": " LDQUOTE ",
+    "”": " RDQUOTE ",
+    "‘": " LSQUOTE ",
+    "’": " RSQUOTE ",
+    "—": " DASH ",
+    "–": " DASH ",
+    "-": " HYPHEN ",
+    "…": " ELLIPS ",
+    "(": " LPAR ",
+    ")": " RPAR ",
+    "[": " LBRAC ",
+    "]": " RBRAC ",
+    "{": " LCURLY ",
+    "}": " RCURLY ",
+    "/": " SLASH ",
+    "\\": " BSLASH "
 }
 
-VOICELESS_STOPS = {'p', 't', 'k'}
+punct_reverse_map = {
+    "COMMA": ",",
+    "FLSTP": ".",
+    "FLSTPH": "।",
+    "QMARK": "?",
+    "EXCLM": "!",
+    "SEMICLN": ";",
+    "COLON": ":",
+    "DQUOTE": "\"",
+    "SQUOTE": "'",
+    "LDQUOTE": "“",
+    "RDQUOTE": "”",
+    "LSQUOTE": "‘",
+    "RSQUOTE": "’",
+    "DASH": "—",
+    "HYPHEN": "-",
+    "ELLIPS": "…",
+    "LPAR": "(",
+    "RPAR": ")",
+    "LBRAC": "[",
+    "RBRAC": "]",
+    "LCURLY": "{",
+    "RCURLY": "}",
+    "SLASH": "/",
+    "BSLASH": "\\",
+}
 
-_SEPARATOR = Separator(phone=' ', word=' | ', syllable='')
+_backends = {}
+_replacements = {}
 
 
-def espeak_phones(text, voice=DEFAULT_VOICE):
-    """Returns a list of espeak phone symbols, word boundaries removed."""
-    text = text.strip()
-    if not text:
-        return []
-    out = phonemize(
-        text,
-        language=voice,
-        backend='espeak',
-        with_stress=False,
-        separator=_SEPARATOR,
-        strip=True,
-        preserve_punctuation=False,
-        njobs=1,
-    )
-    return [t for t in out.split() if t != '|']
+def _backend(language):
+    # created on first use: one espeak backend per language is slow to build
+    if language not in _backends:
+        if language not in lang_code_map:
+            raise ValueError(f'no espeak voice for language {language}; known: {sorted(lang_code_map)}')
+        _backends[language] = EspeakBackend(lang_code_map[language], preserve_punctuation=True,
+                                            language_switch='remove-flags', words_mismatch='ignore')
+    return _backends[language]
 
 
-def text_to_phones(text, vocab, voice=DEFAULT_VOICE):
+def _replacement_table(name):
+    if name not in _replacements:
+        with open(os.path.join(_REPL_DIR, f'replacements_{name}.json'), encoding='utf-8') as f:
+            rep = json.load(f)
+        _replacements[name] = (re.compile('|'.join(map(re.escape, rep.keys()))), rep)
+    return _replacements[name]
+
+
+def apply_replacements(text, pattern, replacements):
+    return pattern.sub(lambda m: replacements[m.group(0)], text)
+
+
+def tokenize_gen_transcript(text, language):
+    phonemized = _backend(language).phonemize([text], separator=_SEPARATOR)
+    if language in ['telugu', 'kannada', 'tamil', 'malayalam']:
+        pat, rep = _replacement_table('drav')
+    elif language in ['english', 'en', 'niaenglish']:
+        pat, rep = _replacement_table('en')
+    else:
+        pat, rep = _replacement_table('deva')
+    result = apply_replacements(phonemized[0], pat, rep)
+    normalized = re.sub(r"\s+", " ", result.strip())
+    return normalized.split(" ")
+
+
+def detect_language(word, lang):
+    """Detects if word is English or Indic (e.g. Hindi)."""
+    return 'en' if re.fullmatch(r'[a-zA-Z0-9]+', word) else lang
+
+
+def tokenize_cross_transcript(text, main_lang):
+    results = []
+    for token in text.split(' '):
+        if token in punct_reverse_map:
+            results.append(punct_reverse_map[token])      # COMMA -> ","
+        elif token == '_':
+            results.append('sp')
+        else:
+            results.extend(tokenize_gen_transcript(token, language=detect_language(token, main_lang)))
+    return results
+
+
+def text_to_phones(text, vocab, language):
     """text -> list of phone symbols that exist in `vocab` (a set of strings).
-    Raises ValueError listing any symbol that cannot be mapped."""
-    raw = espeak_phones(text, voice)
-    mapped = []
-    for sym in raw:
-        sym = ESPEAK_TO_VOCAB.get(sym, sym)
-        mapped.append(sym)
+    Raises ValueError listing any symbol not in the model inventory."""
+    text = text.strip()
+    text = text.replace(" ", " _ ")
+    for punct, token in punct_map.items():
+        text = text.replace(punct, token)
+    for token in punct_map.values():
+        text = text.replace(f"{token} _", token)
 
-    phones = ['ss']
-    for i, sym in enumerate(mapped):
-        if sym in VOICELESS_STOPS and (i == 0 or mapped[i - 1] != 's'):
-            phones.append('cl')
-        phones.append(sym)
-    phones.append('es')
+    # Clean multiple underscores or spaces
+    text = " ".join(text.split())
+
+    phones = ['ss'] + tokenize_cross_transcript(text, language) + ['es']
 
     unknown = sorted({p for p in phones if p not in vocab})
     if unknown:
