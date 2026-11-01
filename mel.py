@@ -1,12 +1,4 @@
-"""Log-mel spectrogram matching the Vocos vocoder used by F5-TTS.
-
-Copied from f5_tts/model_v5/modules.py (get_vocos_mel_spectrogram) with the
-Vocos 20 ms configuration: 16 kHz, n_fft 1024, hop 320 (20 ms), 100 mel bins.
-Output is the natural log of the power-1 mel magnitude, clamped at 1e-5, with
-no further normalisation, which is the domain Vocos decodes from.
-
-Checked against vocos.feature_extractors.MelSpectrogramFeatures with the
-f5_tts/vocoder/config.yaml settings: identical output (max abs diff 0.0).
+"""Log-mel spectrogram matching the Vocos vocoder.
 """
 import torchaudio
 
