@@ -9,9 +9,9 @@ the **phone durations** (a forced alignment).
 |---|---|
 | Format | any file `soundfile` can read (wav, flac, ...) |
 | Channels | mono (multi-channel input is averaged) |
-| Sampling rate | any; resampled to 16 kHz for all features |
+| Sampling rate | 16 kHz for all features |
 | Duration | 0.3 s to 40 s per utterance (outside this range the utterance is skipped) |
-| Naming | the **parent folder of each wav is the speaker key** (see section 4) |
+| Naming | the **parent folder of each wav is the speaker key, parent folder of each speaker folder is the language key** |
 
 The audio is read at training time as well (for the mel spectrogram), so the wav paths in
 the arrow file must stay valid.
@@ -33,6 +33,3 @@ the arrow file must stay valid.
       utt_1002.lab
     ...
 ```
-
-Also check that `sum(phn_durs)` is within about 10 frames of `duration / 0.02` for most rows.
-Rows that differ more are dropped during training (`mismatch` count).
