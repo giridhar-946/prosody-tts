@@ -66,6 +66,7 @@ python prepare_train_data.py --exp_dir /path/to/exp/dir --workers 16
 ## If error occurs with iso369, uninstall python-iso639 in the local by deactivating the prosodytts env (pip uninstall  python-iso639)
 
 # 7. train
+Download the Vocos checkpoint from https://drive.google.com/file/d/1LJ6HnkWk0RvfBVPxYeeTAJOqOfHugamL/view?usp=sharing and place it in the vocoder folder.
 CUDA_VISIBLE_DEVICES=6 python train.py --exp_dir /path/to/exp/dir --frames_per_batch 2500
 
 # 8. synthesize
