@@ -1,7 +1,7 @@
 """Train the MLMS TTS acoustic model on the F5-TTS arrow data.
 
 Usage (after extract_features.py has written <exp_dir>/feats.arrow):
-    python train.py --arrow_dir /path/to/arrow_dir --exp_dir exp
+    python train.py --exp_dir /path/to/exp_dir --exp_dir exp
 
 Batches are built as in F5 DynamicBatchSampler: a budget of mel frames per batch
 (--frames_per_batch, 50 frames = 1 s), capped at --max_samples utterances.
@@ -102,7 +102,6 @@ def split_indices(raw_indices, dev_fraction, max_dev, seed):
 def main():
     p = argparse.ArgumentParser()
     p.add_argument('--exp_dir', default='exp')
-    p.add_argument('--arrow_dir', required=True, help='folder with raw.arrow (see docs/data.md)')
     p.add_argument('--out_dir', default=None, help='default: <exp_dir>/weights')
     p.add_argument('--frames_per_batch', type=int, default=2500,
                    help='mel frames (20 ms each) per batch; 2500 = 50 s of audio')
@@ -112,7 +111,7 @@ def main():
     p.add_argument('--seed', type=int, default=0)
     p.add_argument('--epochs', type=int, default=300)
     p.add_argument('--lr', type=float, default=1e-3)
-    p.add_argument('--patience', type=int, default=10, help='early stopping patience (epochs)')
+    p.add_argument('--patience', type=int, default=50, help='early stopping patience (epochs)')
     p.add_argument('--lr_patience', type=int, default=30, help='ReduceLROnPlateau patience')
     p.add_argument('--lr_factor', type=float, default=0.1)
     p.add_argument('--min_lr', type=float, default=1e-8)
@@ -136,8 +135,8 @@ def main():
 
     train_raw, dev_raw = split_indices([int(r) for r in feats['raw_index']],
                                        args.dev_fraction, args.max_dev, args.seed)
-    train_ds = MLMSDataset(args.arrow_dir, feats, train_raw, phone_table, spk2id, lang2id, stats, scalers)
-    dev_ds = MLMSDataset(args.arrow_dir, feats, dev_raw, phone_table, spk2id, lang2id, stats, scalers)
+    train_ds = MLMSDataset(args.exp_dir, feats, train_raw, phone_table, spk2id, lang2id, stats, scalers)
+    dev_ds = MLMSDataset(args.exp_dir, feats, dev_raw, phone_table, spk2id, lang2id, stats, scalers)
     print(f'train utts {len(train_ds)} (dropped {train_ds.dropped})  dev utts {len(dev_ds)}')
 
     train_sampler = DynamicBatchSampler(train_ds, args.frames_per_batch, args.max_samples, args.seed, shuffle=True)
