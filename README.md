@@ -41,8 +41,8 @@ Full details: [data](docs/data.md), [training](docs/training.md), [inference](do
 # 1. environment (see Installation below)
 conda activate prosodytts
 
-# 2. Preprocess data. See docs/data.md for data structure
-python tools/preprocess_data.py --data_path /path/to/data
+# 2. Preprocess data. See docs/data.md for data structure (Use --dry_run to check what changes)
+python tools/preprocess_data.py --data_dir /path/to/data
 
 # 3. Prepare pronunciation dictionary. If working with multiple languages, repeat the same for all languages
 python prepare_dict.py --language <langauge1> --path /path/to/data
