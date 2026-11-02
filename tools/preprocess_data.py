@@ -84,27 +84,15 @@ def convert(text):
 
 
 def is_formatted(text):
-    """True when text is already 'word _ word PUNCT ...' with no raw punctuation."""
+    """True when text is already tokenized: no raw punctuation characters left, and
+    (for more than one word) at least one '_' or punctuation token present.
+    Spacing of '_' is not checked, since earlier tokenizations placed it differently."""
     tokens = text.split()
     if not tokens:
         return False
-    for i, tok in enumerate(tokens):
-        if tok == "_":
-            # '_' only between two words
-            if i == 0 or i == len(tokens) - 1:
-                return False
-            left, right = tokens[i - 1], tokens[i + 1]
-            if left in PUNCT_TOKENS or left == "_" or right in PUNCT_TOKENS or right == "_":
-                return False
-        elif tok in PUNCT_TOKENS:
-            continue
-        else:
-            if any(ch in punct_map for ch in tok):
-                return False
-            # two words next to each other must have '_' between them
-            if i > 0 and tokens[i - 1] != "_" and tokens[i - 1] not in PUNCT_TOKENS:
-                return False
-    return True
+    if any(ch in punct_map for tok in tokens for ch in tok):
+        return False
+    return len(tokens) == 1 or any(tok == "_" or tok in PUNCT_TOKENS for tok in tokens)
 
 
 def validate_layout(data_dir):
