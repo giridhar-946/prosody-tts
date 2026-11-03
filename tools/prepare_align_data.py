@@ -197,6 +197,6 @@ if __name__ == "__main__":
     parser.add_argument("--exp_dir", type=str, help="Path to experiment folder")
     parser.add_argument("--mfa_dir_list", type=str, nargs="+", help="List of MFA directories")
     args = parser.parse_args()
-    save_dir = os.getcwd() + f"/exp_data/{args.exp_dir}"
+    save_dir = os.getcwd() + f"/{args.exp_dir}"
     print(f"\nSaved to {save_dir}\n")
     main()
