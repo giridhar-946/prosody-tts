@@ -49,12 +49,16 @@ python prepare_dict.py --language <langauge1> --path /path/to/data
 python prepare_dict.py --language <langauge2> --path /path/to/data
 
 # 4. Align speech and phonemes to get phoneme durations.
-mfa validate --temporary_directory /path/to/tmp/dir --clean --no_final_clean --ignore_acoustics --num_jobs 24
-       --use_mp /path/to/data/language /path/to/data/language/language.txt
-python tools/move_oov.py --oov_path ~align_tmp/language/utterance_oovs.txt --data_path /path/to/data/languge --tmp_path temp_dir
-python tools/move_missing.py --missing_path ~align_tmp/language/missing_utterances.txt --data_path /path/to/data/languge --tmp_path temp_dir
+mfa validate --temporary_directory /path/to/tmp/dir --clean --no_final_clean --ignore_acoustics --num_jobs 24 \
+    --use_mp /path/to/data/language /path/to/data/language/language.txt
+python tools/move_oov.py --oov_path ~align_tmp/language/utterance_oovs.txt --data_path /path/to/data/languge \
+    --tmp_path temp_dir
+python tools/move_missing.py --missing_path ~align_tmp/language/missing_utterances.txt --data_path /path/to/data/languge \
+    --tmp_path temp_dir
 Set the frame shift in configs/config_mfa.yaml
-mfa train --config_path configs/config_mfa.yaml --temporary_directory ~/path/to/align-tmp-dir/ --clean --no_final_clean --num_jobs 24 --use_mp /path/to/data/language /path/to/data/language.txt /path/to/data/language/acoustic_model.zip --output_directory /path/to/data/language
+mfa train --config_path configs/config_mfa.yaml --temporary_directory ~/path/to/align-tmp-dir/ --clean --no_final_clean \
+    --num_jobs 24 --use_mp /path/to/data/language /path/to/data/language.txt /path/to/data/language/acoustic_model.zip \
+    --output_directory /path/to/data/language
 
 Repeat the step for all the languages if training for multiple speakers
 
