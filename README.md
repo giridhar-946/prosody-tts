@@ -30,7 +30,7 @@ conda env create -f environment.yml          # or: see requirements.txt
 conda activate prosodytts
 sudo apt-get install espeak-ng                # phonemizer loads libespeak-ng
 conda config --env --add channels conda-forge
-conda install montreal-forced-aligner
+conda install -c conda-forge montreal-forced-aligner=3.3.4   #Use same version
 ```
 
 ## Quick start
